@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Layer Parallax Landscape</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            height: 100vh;
+            width: 7000px;
+        }
+        
+        body::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .parallax-container {
+            position: relative;
+            width: 7000px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .parallax-layer {
+            position: absolute;
+            width: 8000px;
+            height: 100%;
+            bottom: 0;
+            left: -500px;
+        }
+        
+        .mountains {
+            z-index: 1;
+            height: 400px;
+            bottom: 0;
+        }
+        
+        .hills {
+            z-index: 2;
+            height: 300px;
+            bottom: 0;
+        }
+        
+        .skyscrapers {
+            z-index: 3;
+            height: 350px;
+            bottom: 0;
+        }
+        
+        .foreground {
+            z-index: 4;
+            height: 200px;
+            bottom: 0;
+        }
+        
+        .fixed-menu {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 800;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .anchor-point {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .anchor-point:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .anchor-point-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #4B5563;
+        }
+        
+        .anchor-point-text {
+            font-size: 14px;
+            color: #4B5563;
+        }
+        
+        .hover-container {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+        }
+        
+        .hover-container:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        
+        .sun {
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.7));
+            position: relative;
+            z-index: 50;
+        }
+        
+        .hover-container:hover .sun {
+            transform: rotate(15deg);
+        }
+        
+        .cloud-bubble {
+            position: absolute;
+            top: -100px;
+            right: -60px;
+            width: 200px;
+            opacity: 0;
+            transition: all 0.4s ease;
+            transform: translateY(-20px) scale(0.9);
+            pointer-events: none;
+            z-index: 780;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        
+        .hover-container:hover .cloud-bubble {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .cloud-path {
+            fill: white;
+            stroke: #e2e8f0;
+            stroke-width: 2;
+        }
+        
+        .cloud-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            text-align: center;
+            font-size: 14px;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #4b5563;
+            z-index: 800;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .anchor-1 { left: 1000px; top: 100px; }
+        .anchor-2 { left: 2000px; top: 100px; }
+        .anchor-3 { left: 3000px; top: 100px; }
+        .anchor-4 { left: 4000px; top: 100px; }
+        .anchor-5 { left: 5000px; top: 100px; }
+        .anchor-6 { left: 6000px; top: 100px; }
+        .anchor-7 { left: 7000px; top: 100px; }
+        
+        .redirect-message { display: none; }
+        
+        #anchor2 {
+            cursor: pointer;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+    <div class="parallax-container" id="parallax-container">
+        <!-- Layer 1: Mountains (Background - Jagged Line) -->
+        <div class="parallax-layer mountains" id="mountains-layer">
+            <svg width="8000" height="400" viewBox="0 0 8000 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Jagged mountain line -->
+                <path d="M0,400 L0,300 L200,250 L400,180 L600,220 L800,150 L1000,200 L1200,120 L1400,180 L1600,100 L1800,160 L2000,80 L2200,140 L2400,60 L2600,120 L2800,40 L3000,100 L3200,20 L3400,80 L3600,0 L3800,60 L4000,20 L4200,80 L4400,40 L4600,100 L4800,60 L5000,120 L5200,80 L5400,140 L5600,100 L5800,160 L6000,120 L6200,180 L6400,140 L6600,200 L6800,160 L7000,220 L7200,180 L7400,240 L7600,200 L7800,260 L8000,220 L8000,400 Z" fill="#6B7280" />
+                
+                <!-- Snow caps on highest peaks -->
+                <path d="M3600,0 L3500,30 L3700,30 Z M4000,20 L3900,50 L4100,50 Z M2800,40 L2700,70 L2900,70 Z M2400,60 L2300,90 L2500,90 Z" fill="white" />
+                
+                <!-- Second mountain layer -->
+                <path d="M0,400 L0,350 L300,320 L600,280 L900,310 L1200,270 L1500,300 L1800,260 L2100,290 L2400,250 L2700,280 L3000,240 L3300,270 L3600,230 L3900,260 L4200,220 L4500,250 L4800,210 L5100,240 L5400,200 L5700,230 L6000,190 L6300,220 L6600,180 L6900,210 L7200,170 L7500,200 L7800,160 L8000,190 L8000,400 Z" fill="#4B5563" />
+            </svg>
+        </div>
+        
+        <!-- Layer 2: Hills (Wavy Line) -->
+        <div class="parallax-layer hills" id="hills-layer">
+            <svg width="8000" height="300" viewBox="0 0 8000 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Smooth wavy hills -->
+                <path d="M0,300 L0,200 Q400,150 800,200 Q1200,250 1600,200 Q2000,150 2400,200 Q2800,250 3200,200 Q3600,150 4000,200 Q4400,250 4800,200 Q5200,150 5600,200 Q6000,250 6400,200 Q6800,150 7200,200 Q7600,250 8000,200 L8000,300 Z" fill="#4ADE80" />
+                
+                <!-- Second hill layer -->
+                <path d="M0,300 L0,250 Q200,220 400,250 Q600,280 800,250 Q1000,220 1200,250 Q1400,280 1600,250 Q1800,220 2000,250 Q2200,280 2400,250 Q2600,220 2800,250 Q3000,280 3200,250 Q3400,220 3600,250 Q3800,280 4000,250 Q4200,220 4400,250 Q4600,280 4800,250 Q5000,220 5200,250 Q5400,280 5600,250 Q5800,220 6000,250 Q6200,280 6400,250 Q6600,220 6800,250 Q7000,280 7200,250 Q7400,220 7600,250 Q7800,280 8000,250 L8000,300 Z" fill="#22C55E" />
+            </svg>
+        </div>
+        
+        <!-- Layer 3: Skyscrapers -->
+        <div class="parallax-layer skyscrapers" id="skyscrapers-layer">
+            <svg width="8000" height="350" viewBox="0 0 8000 350" xmlns="http://www.w3.org/2000/svg">
+                <!-- Skyscraper 1 -->
+                <rect x="200" y="50" width="80" height="300" fill="#2563EB" />
+                <rect x="210" y="60" width="15" height="15" fill="#FEF3C7" />
+                <rect x="235" y="60" width="15" height="15" fill="#FEF3C7" />
+                <rect x="260" y="60" width="15" height="15" fill="#FEF3C7" />
+                <rect x="210" y="90" width="15" height="15" fill="#FEF3C7" />
+                <rect x="235" y="90" width="15" height="15" fill="#FEF3C7" />
+                <rect x="260" y="90" width="15" height="15" fill="#FEF3C7" />
+                
+                <!-- Skyscraper 2 -->
+                <rect x="400" y="20" width="60" height="330" fill="#7C3AED" />
+                <rect x="408" y="30" width="12" height="12" fill="#FEF3C7" />
+                <rect x="428" y="30" width="12" height="12" fill="#FEF3C7" />
+                <rect x="448" y="30" width="12" height="12" fill="#FEF3C7" />
+                <rect x="408" y="55" width="12" height="12" fill="#FEF3C7" />
+                <rect x="428" y="55" width="12" height="12" fill="#FEF3C7" />
+                <rect x="448" y="55" width="12" height="12" fill="#FEF3C7" />
+                
+                <!-- Skyscraper 3 -->
+                <rect x="600" y="80" width="100" height="270" fill="#DC2626" />
+                <rect x="615" y="95" width="18" height="18" fill="#FEF3C7" />
+                <rect x="645" y="95" width="18" height="18" fill="#FEF3C7" />
+                <rect x="675" y="95" width="18" height="18" fill="#FEF3C7" />
+                <rect x="615" y="130" width="18" height="18" fill="#FEF3C7" />
+                <rect x="645" y="130" width="18" height="18" fill="#FEF3C7" />
+                <rect x="675" y="130" width="18" height="18" fill="#FEF3C7" />
+                
+                <!-- Skyscraper 4 -->
+                <rect x="850" y="40" width="70" height="310" fill="#059669" />
+                <rect x="860" y="55" width="14" height="14" fill="#FEF3C7" />
+                <rect x="885" y="55" width="14" height="14" fill="#FEF3C7" />
+                <rect x="910" y="55" width="14" height="14" fill="#FEF3C7" />
+                <rect x="860" y="85" width="14" height="14" fill="#FEF3C7" />
+                <rect x="885" y="85" width="14" height="14" fill="#FEF3C7" />
+                <rect x="910" y="85" width="14" height="14" fill="#FEF3C7" />
+                
+                <!-- Skyscraper 5 -->
+                <rect x="1100" y="10" width="90" height="340" fill="#F59E0B" />
+                <rect x="1115" y="25" width="16" height="16" fill="#FEF3C7" />
+                <rect x="1145" y="25" width="16" height="16" fill="#FEF3C7" />
+                <rect x="1175" y="25" width="16" height="16" fill="#FEF3C7" />
+                <rect x="1115" y="60" width="16" height="16" fill="#FEF3C7" />
+                <rect x="1145" y="60" width="16" height="16" fill="#FEF3C7" />
+                <rect x="1175" y="60" width="16" height="16" fill="#FEF3C7" />
+                
+                <!-- Continue pattern for more skyscrapers -->
+                <rect x="1400" y="70" width="85" height="280" fill="#8B5CF6" />
+                <rect x="1600" y="30" width="75" height="320" fill="#EF4444" />
+                <rect x="1800" y="90" width="95" height="260" fill="#10B981" />
+                <rect x="2000" y="15" width="65" height="335" fill="#3B82F6" />
+                <rect x="2200" y="60" width="80" height="290" fill="#F97316" />
+                <rect x="2400" y="25" width="70" height="325" fill="#6366F1" />
+                <rect x="2600" y="85" width="90" height="265" fill="#EC4899" />
+                <rect x="2800" y="45" width="75" height="305" fill="#14B8A6" />
+                <rect x="3000" y="20" width="85" height="330" fill="#F59E0B" />
+                <rect x="3200" y="75" width="80" height="275" fill="#8B5CF6" />
+                <rect x="3400" y="35" width="70" height="315" fill="#EF4444" />
+                <rect x="3600" y="55" width="95" height="295" fill="#10B981" />
+                <rect x="3800" y="10" width="65" height="340" fill="#3B82F6" />
+                <rect x="4000" y="80" width="85" height="270" fill="#F97316" />
+                <rect x="4200" y="40" width="75" height="310" fill="#6366F1" />
+                <rect x="4400" y="65" width="80" height="285" fill="#EC4899" />
+                <rect x="4600" y="25" width="90" height="325" fill="#14B8A6" />
+                <rect x="4800" y="50" width="70" height="300" fill="#F59E0B" />
+                <rect x="5000" y="15" width="85" height="335" fill="#8B5CF6" />
+                <rect x="5200" y="70" width="75" height="280" fill="#EF4444" />
+                <rect x="5400" y="30" width="95" height="320" fill="#10B981" />
+                <rect x="5600" y="85" width="65" height="265" fill="#3B82F6" />
+                <rect x="5800" y="45" width="80" height="305" fill="#F97316" />
+                <rect x="6000" y="20" width="75" height="330" fill="#6366F1" />
+                <rect x="6200" y="60" width="90" height="290" fill="#EC4899" />
+                <rect x="6400" y="35" width="70" height="315" fill="#14B8A6" />
+                <rect x="6600" y="75" width="85" height="275" fill="#F59E0B" />
+                <rect x="6800" y="25" width="80" height="325" fill="#8B5CF6" />
+                <rect x="7000" y="55" width="75" height="295" fill="#EF4444" />
+                <rect x="7200" y="40" width="95" height="310" fill="#10B981" />
+                <rect x="7400" y="65" width="65" height="285" fill="#3B82F6" />
+                <rect x="7600" y="30" width="85" height="320" fill="#F97316" />
+                <rect x="7800" y="50" width="80" height="300" fill="#6366F1" />
+            </svg>
+        </div>
+        
+        <!-- Layer 4: Foreground (Houses and Trees) -->
+        <div class="parallax-layer foreground" id="foreground-layer">
+            <svg width="8000" height="200" viewBox="0 0 8000 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- House 1 -->
+                <g transform="translate(300, 100)">
+                    <polygon points="0,30 40,0 80,30" fill="#6D6875" />
+                    <rect x="0" y="30" width="80" height="70" fill="#E63946" />
+                    <rect x="32" y="65" width="16" height="35" fill="#5C4742" />
+                    <rect x="12" y="45" width="16" height="16" fill="#F8F9FA" />
+                    <rect x="52" y="45" width="16" height="16" fill="#F8F9FA" />
+                </g>
+                
+                <!-- Tree 1 -->
+                <g transform="translate(450, 50)">
+                    <rect x="18" y="120" width="14" height="30" fill="#7D5A50" />
+                    <polygon points="25,0 0,120 50,120" fill="#2D6A4F" />
+                    <polygon points="25,30 5,100 45,100" fill="#40916C" />
+                </g>
+                
+                <!-- House 2 -->
+                <g transform="translate(600, 110)">
+                    <polygon points="0,25 35,0 70,25" fill="#6D6875" />
+                    <rect x="0" y="25" width="70" height="65" fill="#457B9D" />
+                    <rect x="28" y="55" width="14" height="35" fill="#5C4742" />
+                    <rect x="10" y="40" width="14" height="14" fill="#F8F9FA" />
+                    <rect x="46" y="40" width="14" height="14" fill="#F8F9FA" />
+                </g>
+                
+                <!-- Tree 2 -->
+                <g transform="translate(750, 40)">
+                    <rect x="20" y="130" width="16" height="30" fill="#7D5A50" />
+                    <polygon points="28,0 0,130 56,130" fill="#52B788" />
+                    <polygon points="28,35 8,110 48,110" fill="#74C69D" />
+                </g>
+                
+                <!-- House 3 -->
+                <g transform="translate(900, 105)">
+                    <polygon points="0,28 42,0 84,28" fill="#6D6875" />
+                    <rect x="0" y="28" width="84" height="67" fill="#F4A261" />
+                    <rect x="34" y="60" width="16" height="35" fill="#5C4742" />
+                    <rect x="14" y="43" width="16" height="16" fill="#F8F9FA" />
+                    <rect x="54" y="43" width="16" height="16" fill="#F8F9FA" />
+                </g>
+                
+                <!-- Continue pattern for more houses and trees -->
+                <g transform="translate(1200, 45)">
+                    <rect x="22" y="125" width="18" height="30" fill="#7D5A50" />
+                    <polygon points="31,0 0,125 62,125" fill="#2D6A4F" />
+                </g>
+                
+                <g transform="translate(1400, 115)">
+                    <polygon points="0,26 38,0 76,26" fill="#6D6875" />
+                    <rect x="0" y="26" width="76" height="59" fill="#E76F51" />
+                    <rect x="30" y="52" width="16" height="33" fill="#5C4742" />
+                </g>
+                
+                <g transform="translate(1600, 55)">
+                    <rect x="19" y="115" width="15" height="30" fill="#7D5A50" />
+                    <polygon points="26,0 0,115 52,115" fill="#40916C" />
+                </g>
+                
+                <g transform="translate(1800, 120)">
+                    <polygon points="0,24 36,0 72,24" fill="#6D6875" />
+                    <rect x="0" y="24" width="72" height="56" fill="#A8DADC" />
+                </g>
+                
+                <g transform="translate(2000, 50)">
+                    <rect x="21" y="120" width="17" height="30" fill="#7D5A50" />
+                    <polygon points="29,0 0,120 58,120" fill="#52B788" />
+                </g>
+                
+                <g transform="translate(2200, 108)">
+                    <polygon points="0,27 40,0 80,27" fill="#6D6875" />
+                    <rect x="0" y="27" width="80" height="65" fill="#E63946" />
+                </g>
+                
+                <g transform="translate(2400, 48)">
+                    <rect x="20" y="122" width="16" height="30" fill="#7D5A50" />
+                    <polygon points="28,0 0,122 56,122" fill="#74C69D" />
+                </g>
+                
+                <g transform="translate(2600, 112)">
+                    <polygon points="0,25 37,0 74,25" fill="#6D6875" />
+                    <rect x="0" y="25" width="74" height="63" fill="#457B9D" />
+                </g>
+                
+                <g transform="translate(2800, 52)">
+                    <rect x="18" y="118" width="14" height="30" fill="#7D5A50" />
+                    <polygon points="25,0 0,118 50,118" fill="#2D6A4F" />
+                </g>
+                
+                <g transform="translate(3000, 106)">
+                    <polygon points="0,26 39,0 78,26" fill="#6D6875" />
+                    <rect x="0" y="26" width="78" height="68" fill="#F4A261" />
+                </g>
+                
+                <g transform="translate(3200, 46)">
+                    <rect x="22" y="124" width="18" height="30" fill="#7D5A50" />
+                    <polygon points="31,0 0,124 62,124" fill="#40916C" />
+                </g>
+                
+                <g transform="translate(3400, 114)">
+                    <polygon points="0,24 35,0 70,24" fill="#6D6875" />
+                    <rect x="0" y="24" width="70" height="62" fill="#E76F51" />
+                </g>
+                
+                <g transform="translate(3600, 54)">
+                    <rect x="19" y="116" width="15" height="30" fill="#7D5A50" />
+                    <polygon points="26,0 0,116 52,116" fill="#52B788" />
+                </g>
+                
+                <g transform="translate(3800, 110)">
+                    <polygon points="0,25 38,0 76,25" fill="#6D6875" />
+                    <rect x="0" y="25" width="76" height="65" fill="#A8DADC" />
+                </g>
+                
+                <g transform="translate(4000, 49)">
+                    <rect x="21" y="121" width="17" height="30" fill="#7D5A50" />
+                    <polygon points="29,0 0,121 58,121" fill="#74C69D" />
+                </g>
+                
+                <g transform="translate(4200, 107)">
+                    <polygon points="0,27 41,0 82,27" fill="#6D6875" />
+                    <rect x="0" y="27" width="82" height="66" fill="#E63946" />
+                </g>
+                
+                <g transform="translate(4400, 51)">
+                    <rect x="20" y="119" width="16" height="30" fill="#7D5A50" />
+                    <polygon points="28,0 0,119 56,119" fill="#2D6A4F" />
+                </g>
+                
+                <g transform="translate(4600, 113)">
+                    <polygon points="0,24 36,0 72,24" fill="#6D6875" />
+                    <rect x="0" y="24" width="72" height="63" fill="#457B9D" />
+                </g>
+                
+                <g transform="translate(4800, 47)">
+                    <rect x="18" y="123" width="14" height="30" fill="#7D5A50" />
+                    <polygon points="25,0 0,123 50,123" fill="#40916C" />
+                </g>
+                
+                <g transform="translate(5000, 109)">
+                    <polygon points="0,26 40,0 80,26" fill="#6D6875" />
+                    <rect x="0" y="26" width="80" height="65" fill="#F4A261" />
+                </g>
+                
+                <g transform="translate(5200, 53)">
+                    <rect x="22" y="117" width="18" height="30" fill="#7D5A50" />
+                    <polygon points="31,0 0,117 62,117" fill="#52B788" />
+                </g>
+                
+                <g transform="translate(5400, 111)">
+                    <polygon points="0,25 37,0 74,25" fill="#6D6875" />
+                    <rect x="0" y="25" width="74" height="64" fill="#E76F51" />
+                </g>
+                
+                <g transform="translate(5600, 48)">
+                    <rect x="19" y="122" width="15" height="30" fill="#7D5A50" />
+                    <polygon points="26,0 0,122 52,122" fill="#74C69D" />
+                </g>
+                
+                <g transform="translate(5800, 105)">
+                    <polygon points="0,27 39,0 78,27" fill="#6D6875" />
+                    <rect x="0" y="27" width="78" height="68" fill="#A8DADC" />
+                </g>
+                
+                <g transform="translate(6000, 50)">
+                    <rect x="21" y="120" width="17" height="30" fill="#7D5A50" />
+                    <polygon points="29,0 0,120 58,120" fill="#2D6A4F" />
+                </g>
+                
+                <g transform="translate(6200, 108)">
+                    <polygon points="0,26 38,0 76,26" fill="#6D6875" />
+                    <rect x="0" y="26" width="76" height="66" fill="#E63946" />
+                </g>
+                
+                <g transform="translate(6400, 52)">
+                    <rect x="20" y="118" width="16" height="30" fill="#7D5A50" />
+                    <polygon points="28,0 0,118 56,118" fill="#40916C" />
+                </g>
+                
+                <g transform="translate(6600, 112)">
+                    <polygon points="0,24 35,0 70,24" fill="#6D6875" />
+                    <rect x="0" y="24" width="70" height="64" fill="#457B9D" />
+                </g>
+                
+                <g transform="translate(6800, 49)">
+                    <rect x="18" y="121" width="14" height="30" fill="#7D5A50" />
+                    <polygon points="25,0 0,121 50,121" fill="#52B788" />
+                </g>
+                
+                <g transform="translate(7000, 106)">
+                    <polygon points="0,25 42,0 84,25" fill="#6D6875" />
+                    <rect x="0" y="25" width="84" height="69" fill="#F4A261" />
+                </g>
+                
+                <g transform="translate(7200, 54)">
+                    <rect x="22" y="116" width="18" height="30" fill="#7D5A50" />
+                    <polygon points="31,0 0,116 62,116" fill="#74C69D" />
+                </g>
+                
+                <g transform="translate(7400, 110)">
+                    <polygon points="0,26 36,0 72,26" fill="#6D6875" />
+                    <rect x="0" y="26" width="72" height="64" fill="#E76F51" />
+                </g>
+                
+                <g transform="translate(7600, 51)">
+                    <rect x="19" y="119" width="15" height="30" fill="#7D5A50" />
+                    <polygon points="26,0 0,119 52,119" fill="#2D6A4F" />
+                </g>
+            </svg>
+        </div>
+        
+        <!-- Anchor points with content -->
+        <div class="hover-container anchor-1" id="anchor1">
+            <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">1</div>
+        </div>
+        
+        <div class="hover-container anchor-2" id="anchor2">
+            <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="25" fill="#FDB813" />
+                <g stroke="#FDB813" stroke-width="6" stroke-linecap="round">
+                    <line x1="50" y1="15" x2="50" y2="5" />
+                    <line x1="50" y1="95" x2="50" y2="85" />
+                    <line x1="15" y1="50" x2="5" y2="50" />
+                    <line x1="95" y1="50" x2="85" y2="50" />
+                    <line x1="25.5" y1="25.5" x2="18.5" y2="18.5" />
+                    <line x1="74.5" y1="74.5" x2="81.5" y2="81.5" />
+                    <line x1="25.5" y1="74.5" x2="18.5" y2="81.5" />
+                    <line x1="74.5" y1="25.5" x2="81.5" y2="18.5" />
+                </g>
+                <g fill="#FF8C00">
+                    <circle cx="42" cy="45" r="3" />
+                    <circle cx="58" cy="45" r="3" />
+                    <path d="M42,60 Q50,67 58,60" fill="none" stroke="#FF8C00" stroke-width="2" stroke-linecap="round" />
+                </g>
+            </svg>
+            
+            <div class="cloud-bubble">
+                <svg width="100%" height="100%" viewBox="0 0 200 120">
+                    <path class="cloud-path" d="M190,60 C190,30 170,10 140,10 C120,10 100,20 90,40 C80,20 50,20 40,40 C20,40 10,50 10,70 C10,90 30,110 50,110 H140 C170,110 190,90 190,60 Z M50,110 L40,120 L55,105" />
+                </svg>
+                <div class="cloud-text">
+                    <p>Ciao! Sono il sole! Passa il mouse su di me per vedere questo messaggio!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hover-container anchor-3" id="anchor3">
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">3</div>
+        </div>
+        
+        <div class="hover-container anchor-4" id="anchor4">
+            <div class="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">4</div>
+        </div>
+        
+        <div class="hover-container anchor-5" id="anchor5">
+            <div class="w-20 h-20 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold">5</div>
+        </div>
+        
+        <div class="hover-container anchor-6" id="anchor6">
+            <div class="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">6</div>
+        </div>
+        
+        <div class="hover-container anchor-7" id="anchor7">
+            <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">7</div>
+        </div>
+    </div>
+    
+    <!-- Fixed menu in the left corner -->
+    <div class="fixed-menu">
+        <div class="anchor-point" onclick="scrollToAnchor(1000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Punto 1 (1000, 100)</div>
+        </div>
+        <div class="anchor-point" onclick="scrollToAnchor(2000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Sole (2000, 100)</div>
+        </div>
+        <div class="anchor-point" onclick="scrollToAnchor(3000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Punto 3 (3000, 100)</div>
+        </div>
+        <div class="anchor-point" onclick="scrollToAnchor(4000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Punto 4 (4000, 100)</div>
+        </div>
+        <div class="anchor-point" onclick="scrollToAnchor(5000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Punto 5 (5000, 100)</div>
+        </div>
+        <div class="anchor-point" onclick="scrollToAnchor(6000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Punto 6 (6000, 100)</div>
+        </div>
+        <div class="anchor-point" onclick="scrollToAnchor(7000)">
+            <div class="anchor-point-dot"></div>
+            <div class="anchor-point-text">Punto 7 (7000, 100)</div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        Scroll orizzontalmente per vedere l'effetto parallasse a 4 livelli ↔️ o usa il menu per navigare
+    </div>
+    
+    <div class="redirect-message" id="redirect-message">
+        Ritorno all'inizio...
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('parallax-container');
+            const mountainsLayer = document.getElementById('mountains-layer');
+            const hillsLayer = document.getElementById('hills-layer');
+            const skyscrapersLayer = document.getElementById('skyscrapers-layer');
+            const foregroundLayer = document.getElementById('foreground-layer');
+            const redirectMessage = document.getElementById('redirect-message');
+            
+            // Set initial positions
+            mountainsLayer.style.transform = 'translateX(0px)';
+            hillsLayer.style.transform = 'translateX(0px)';
+            skyscrapersLayer.style.transform = 'translateX(0px)';
+            foregroundLayer.style.transform = 'translateX(0px)';
+            
+            // Define the maximum scroll position
+            const maxScroll = 7000;
+            const redirectThreshold = 6950;
+            const warningThreshold = 6400;
+            
+            // Track scroll position
+            let scrollPosition = 0;
+            let isRedirecting = false;
+            
+            // Function to update parallax effect (4 layers)
+            function updateParallax() {
+                // Layer 1: Mountains move slowest (background)
+                mountainsLayer.style.transform = `translateX(${-scrollPosition * 0.1}px)`;
+                // Layer 2: Hills move at slow-medium speed
+                hillsLayer.style.transform = `translateX(${-scrollPosition * 0.3}px)`;
+                // Layer 3: Skyscrapers move at medium-fast speed
+                skyscrapersLayer.style.transform = `translateX(${-scrollPosition * 0.6}px)`;
+                // Layer 4: Foreground (houses and trees) moves fastest
+                foregroundLayer.style.transform = `translateX(${-scrollPosition * 0.9}px)`;
+            }
+            
+            // Create scroll effect
+            window.addEventListener('scroll', function() {
+                scrollPosition = window.scrollX;
+                updateParallax();
+                
+                // Update instruction text based on position
+                if (scrollPosition >= warningThreshold) {
+                    document.querySelector('.instructions').textContent = 'Stai per raggiungere la fine della pagina!';
+                    document.querySelector('.instructions').style.backgroundColor = 'rgba(255, 193, 7, 0.8)';
+                } else {
+                    document.querySelector('.instructions').textContent = 'Scroll orizzontalmente per vedere l\'effetto parallasse a 4 livelli ↔️ o usa il menu per navigare';
+                    document.querySelector('.instructions').style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                }
+                
+                // Check for infinite scroll
+                const maxScrollLeft = document.body.scrollWidth - window.innerWidth;
+                
+                if (scrollPosition >= Math.min(redirectThreshold, maxScrollLeft - 50) && !isRedirecting) {
+                    isRedirecting = true;
+                    
+                    window.scrollTo({
+                        left: 0,
+                        behavior: 'instant'
+                    });
+                    
+                    setTimeout(function() {
+                        isRedirecting = false;
+                    }, 100);
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                updateParallax();
+            });
+        });
+        
+        // Function to scroll to anchor points
+        function scrollToAnchor(position) {
+            window.scrollTo({
+                left: position - window.innerWidth / 2,
+                behavior: 'smooth'
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e0ed8ca6b40e69',t:'MTc1NTAxMTcyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
